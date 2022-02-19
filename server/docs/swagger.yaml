@@ -1,0 +1,280 @@
+basePath: /
+definitions:
+  model.File:
+    properties:
+      chunkTotal:
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      fileChunk:
+        items:
+          $ref: '#/definitions/model.FileChunk'
+        type: array
+      fileMd5:
+        type: string
+      fileName:
+        type: string
+      filePath:
+        type: string
+      id:
+        description: 主键ID
+        type: integer
+      isFinish:
+        type: boolean
+      updateTime:
+        description: 更新时间
+        type: string
+    type: object
+  model.FileChunk:
+    properties:
+      createTime:
+        description: 创建时间
+        type: string
+      exaFileID:
+        type: integer
+      fileChunkNumber:
+        type: integer
+      fileChunkPath:
+        type: string
+      id:
+        description: 主键ID
+        type: integer
+      updateTime:
+        description: 更新时间
+        type: string
+    type: object
+  model.FileUpload:
+    properties:
+      createTime:
+        description: 创建时间
+        type: string
+      id:
+        description: 主键ID
+        type: integer
+      key:
+        description: 编号
+        type: string
+      name:
+        description: 文件名
+        type: string
+      tag:
+        description: 文件标签
+        type: string
+      updateTime:
+        description: 更新时间
+        type: string
+      url:
+        description: 文件地址
+        type: string
+    type: object
+  request.PageInfo:
+    properties:
+      page:
+        description: 页码
+        type: integer
+      pageSize:
+        description: 每页大小
+        type: integer
+    type: object
+  response.FilePathResponse:
+    properties:
+      filePath:
+        type: string
+    type: object
+  response.FileResponse:
+    properties:
+      file:
+        $ref: '#/definitions/model.File'
+        type: object
+    type: object
+  response.FileUploadResponse:
+    properties:
+      file:
+        $ref: '#/definitions/model.FileUpload'
+        type: object
+    type: object
+  response.PageResult:
+    properties:
+      list:
+        type: object
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
+  response.Response:
+    properties:
+      code:
+        type: integer
+      data:
+        type: object
+      msg:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: swagger Api
+  license: {}
+  title: 断点续传服务
+  version: "1.0"
+paths:
+  /fileUpload/breakpointContinue:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: an example for breakpoint resume, 断点续传示例
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 断点续传到服务器
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      summary: 断点续传到服务器
+      tags:
+      - fileUpload
+  /fileUpload/deleteFile:
+    post:
+      parameters:
+      - description: 传入文件里面id即可
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.FileUpload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除文件
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      summary: 删除文件
+      tags:
+      - fileUpload
+  /fileUpload/findFile:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 上传文件完成
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建文件,返回包括文件路径
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.FilePathResponse'
+                msg:
+                  type: string
+              type: object
+      summary: 创建文件
+      tags:
+      - fileUpload
+  /fileUpload/getFileList:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 页码, 每页大小
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.PageInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 分页文件列表,返回包括列表,总数,页码,每页数量
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PageResult'
+                msg:
+                  type: string
+              type: object
+      summary: 分页文件列表
+      tags:
+      - fileUpload
+  /fileUpload/removeChunk:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 删除缓存切片
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除切片
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      summary: 删除切片
+      tags:
+      - fileUpload
+  /fileUpload/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 上传文件示例
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传文件示例,返回包括文件详情
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.FileUploadResponse'
+                msg:
+                  type: string
+              type: object
+      summary: 上传文件示例
+      tags:
+      - fileUpload
+swagger: "2.0"
